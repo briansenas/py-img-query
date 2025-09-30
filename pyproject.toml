@@ -1,6 +1,6 @@
 [project]
 name = "py-img-query"
-version = "0.2"
+version = "0.2.1"
 description = "Given a json file with image paths and attributes, allows to quickly visualize examples based on the selected attributes. "
 readme = "README.md"
 requires-python = ">=3.10"
@@ -9,5 +9,6 @@ dependencies = [
     "opencv-python>=4.11.0.86",
     "pandas>=2.3.3",
     "pre-commit>=4.3.0",
+    "scikit-image>=0.25.2",
     "streamlit>=1.50.0",
 ]

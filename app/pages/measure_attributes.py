@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 import streamlit as st
 from PIL import Image
+from skimage.feature import local_binary_pattern
 
 
 # --- Image attribute functions ---
@@ -33,12 +34,54 @@ def compute_entropy(img):
     return float(-np.sum(hist * np.log2(hist)))
 
 
+def line_count(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+    lines = cv2.HoughLinesP(
+        edges,
+        1,
+        np.pi / 180,
+        threshold=100,
+        minLineLength=50,
+        maxLineGap=10,
+    )
+    return 0 if lines is None else len(lines)
+
+
+def compute_sift(img):
+    # Unstructured images will have low keypoints and descriptors
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    sift = cv2.SIFT_create()
+    keypoints, _ = sift.detectAndCompute(gray, None)
+    return len(keypoints)
+
+
+def compute_lbp(img):
+    # Uniform images have no variance thus lack patterns
+    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    radius = 3
+    n_points = 8 * radius
+    lbp = local_binary_pattern(gray, n_points, radius, method="uniform")
+    return np.var(lbp)
+
+
+def laplacian_var(img):
+    # Blurry images have low Laplacian var
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+    return laplacian_var
+
+
 # Map attribute names to functions
 ATTRIBUTE_FUNCTIONS = {
     "contrast": compute_contrast,
     "edge_density": compute_edge_density,
     "variance": compute_variance,
     "entropy": compute_entropy,
+    "line_count": line_count,
+    "sift_keypoints": compute_sift,
+    "lpb_var": compute_lbp,
+    "laplacian_var": laplacian_var,
 }
 
 # --- Streamlit UI ---
