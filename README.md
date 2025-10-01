@@ -79,7 +79,8 @@ image-attribute-explorer/
 - I really need to learn how to design stuff....
 
 ## 4. New Functionality
-- [ ] **Build `select_images(filters)` function**
+- [X] **Build `select_images(filters)` function**
+    - Improve it by allow mouse click / drag?
 
 ## 5. Development & Maintenance
 - [ ] Everything is a mess tbh
