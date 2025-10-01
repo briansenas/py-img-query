@@ -1,6 +1,6 @@
 [project]
 name = "py-img-query"
-version = "0.3.0"
+version = "0.4.0"
 description = "Given a json file with image paths and attributes, allows to quickly visualize examples based on the selected attributes. "
 readme = "README.md"
 requires-python = ">=3.10"
