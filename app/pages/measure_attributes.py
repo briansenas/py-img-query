@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import cv2
@@ -122,6 +123,7 @@ if process_button:
                         func = ATTRIBUTE_FUNCTIONS[attr]
                         img_data[attr] = func(img)
                     img_data["image_path"] = str(img_path)
+                    img_data["image_basename"] = os.path.basename(img_path)
                     result[str(img_path)] = img_data
                 except Exception as e:
                     st.warning(f"Failed to process {img_path}: {e}")

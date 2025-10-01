@@ -12,6 +12,7 @@ from PIL import Image
 def load_data(json_file):
     data = json.load(json_file)
     df = pd.DataFrame.from_dict(data, orient="index")
+    df = df.sort_values("image_basename")
     return df
 
 
@@ -24,6 +25,9 @@ st_env_keys = [
 for env in st_env_keys:
     if env not in st.session_state:
         st.session_state[env] = 0
+selected_col = "selected_images"
+if selected_col not in st.session_state:
+    st.session_state[selected_col] = set()
 
 json_file = st.file_uploader("Upload JSON file", type="json")
 if json_file is not None:
@@ -32,7 +36,6 @@ if json_file is not None:
     else:
         with open(st.session_state.tmp_file) as file:
             df = load_data(file)
-
     # --- Filters Section ---
     st.sidebar.header("Build Filters")
     st.sidebar.write("Choose filters and combine with AND/OR")
@@ -95,8 +98,16 @@ if json_file is not None:
         else:
             mask = mask & condition if op == "AND" else mask | condition
 
+    mask = mask & (~df["image_basename"].isin(set(st.session_state.selected_images)))
+
     filtered_df = df[mask]
     st.write(f"Found {len(filtered_df)} matching images")
+    image_options = df["image_basename"].sort_values()
+    st.multiselect(
+        "Remove Individual Images",
+        options=image_options,
+        key="selected_images",
+    )
 
     # --- Right-side Pagination Controls ---
     st.markdown("---")
@@ -159,6 +170,10 @@ if json_file is not None:
         for idx, row in enumerate(page_df.iterrows()):
             col = cols[idx % cols_per_row]
             with col:
-                st.image(Image.open(row[1]["image_path"]), caption=row[0], width=200)
+                st.image(
+                    Image.open(row[1]["image_path"]),
+                    caption=row[1]["image_basename"],
+                    width=200,
+                )
                 with st.expander("Attributes"):
                     st.json(row[1].to_dict())
