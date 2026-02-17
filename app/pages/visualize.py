@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 
 import pandas as pd
 import streamlit as st
@@ -11,7 +12,11 @@ from PIL import Image
 @st.cache_data
 def load_data(json_file):
     data = json.load(json_file)
-    df = pd.DataFrame.from_dict(data, orient="index")
+    try:
+        df = pd.DataFrame.from_dict(data, orient="index")
+    except AttributeError:
+        basename = map(lambda x: os.path.basename(x), data)
+        df = pd.DataFrame({"image_basename": basename, "image_path": data})
     df = df.sort_values("image_basename")
     return df
 
@@ -41,17 +46,17 @@ if json_file is not None:
     st.sidebar.write("Choose filters and combine with AND/OR")
 
     filters = []
-    num_filters = st.sidebar.number_input("Number of filters", 1, 10, 1)
+    num_filters = st.sidebar.number_input("Number of filters", 0, 10, 0)
 
     for i in range(num_filters):
-        st.sidebar.markdown(f"### Filter {i+1}")
+        st.sidebar.markdown(f"### Filter {i + 1}")
         col = st.sidebar.selectbox(
-            f"Attribute {i+1}",
+            f"Attribute {i + 1}",
             options=df.columns,
             key=f"col_{i}_{st.session_state.tmp_file_counter}",
         )
         operator = st.sidebar.selectbox(
-            f"Operator {i+1}",
+            f"Operator {i + 1}",
             options=["AND", "OR"],
             key=f"op_{i}_{st.session_state.tmp_file_counter}",
         )
@@ -87,7 +92,7 @@ if json_file is not None:
             if val.strip():
                 filters.append((col, val, operator))
 
-    mask = pd.Series([False] * len(df), index=df.index)
+    mask = pd.Series([len(filters) == 0] * len(df), index=df.index)
     for i, (col, val, op) in enumerate(filters):
         if isinstance(val, tuple):  # numeric range
             condition = (df[col] >= val[0]) & (df[col] <= val[1])

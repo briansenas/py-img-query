@@ -112,7 +112,7 @@ if process_button:
             st.error("Folder does not exist.")
         else:
             st.info("Processing images... This may take a while.")
-            image_paths = list(folder.rglob("*.[jp][pn]g"))  # jpg and png recursively
+            image_paths = list(folder.rglob("**/**/*.jpg"))  # jpg and png recursively
             result = {}
             stqdm = st.progress(0, text="Progress")
             for img_path in image_paths:
